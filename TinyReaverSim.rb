@@ -106,10 +106,22 @@ class TinyReaver
     
     # Add a new line
     log :nl
+    log :out, "Association complete, beginning attack."
     
-    while @state == STATE_ASSOC
-      
+    
+    while @state == STATE_ASSOC  
       sleep 0.5
+      
+      log :out, "Trying pin #{pad_pin}"
+      
+      outgoing_msg = create_message :m4, pad_pin
+      reply = send_message(outgoing_msg)
+      
+      log :db, "Made message: #{outgoing_msg}"
+      log :db, "Got reply: #{reply}"
+      
+      receive_message(reply)
+      
     end
     
     while @state == STATE_HALF_DONE
@@ -127,8 +139,20 @@ class TinyReaver
   #
   private
   
+  def pad_pin
+    ret = "#{@current_pin}"
+    
+    (4 - ret.length).times {
+      ret = "0" + ret
+    }
+    
+    ret += "0000"
+    
+    return ret
+    
+  end
   
-  def log type, content
+  def log type, content=""
     TinyReaver.log type, content
   end
   
@@ -141,23 +165,23 @@ class TinyReaver
   
   # Genereate a pin
   def next_pin
-    
+    @current_pin += 1
   end
   
   
   ### Messaging
   
   # Create a message
-    def create_message type, playload=""
+    def create_message type, payload=""
       case type
         
       ### Attacker messages
       when :m2
         "#{MSG_M2}:Association request."
       when :m4
-        "m4:#{payload}"
+        "#{MSG_M4}:#{payload}"
       when :m6
-        "m6:#{payload}"
+        "#{MSG_M6}:#{payload}"
       end  
     end
     
@@ -165,7 +189,7 @@ class TinyReaver
     # Receive a message
     def receive_message msg
       if msg == "EAPNAK"
-        log :out, "Received EAPNAK for #{@current_pin}, trying next pin..."
+        log :out, "Received EAPNAK for #{pad_pin}, trying next pin..."
         next_pin
       end
       
@@ -173,12 +197,9 @@ class TinyReaver
       msg_type = msg_array[0]
       msg_content = msg_array[1]
       
-      log :db, "This is the message:#{msg}"
-      log :db, "This is the message TYPE:#{msg_type}"
-      log :db, "This is the message ARRAY:#{msg_array}"
       
       case msg_type
-      
+
       # Beacon message from router
       when MSG_M1
         
@@ -189,12 +210,11 @@ class TinyReaver
         
         receive_message @router.assoc_message
         
-        
       # Association message
       when MSG_M3
         # Change the state to associated
         @state = STATE_ASSOC
-        log :out, "Received M3:#{msg_content}"
+        log :out, "Received M3: '#{msg_content}'"
         
       when MSG_M5
         # We have the first 4 digits of the pin
@@ -219,6 +239,7 @@ end
 ############ ############ ############ ############ 
 # Running
 #
+`clear`
 
 case ARGV.shift
 when "--scan", "-s"

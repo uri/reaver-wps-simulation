@@ -7,6 +7,9 @@ module TinyReaverCommon
   STATE_HALF_DONE = "half_done_state"
   STATE_ATTACK_SUCCESSFUL = "attack_successful_state"
   
+  ROUTER_STATE_PRE_M5 = "router_state_pre_m5"
+  ROUTER_STATE_POST_M5 = "router_state_post_m5"
+  
   MSG_M1 = "m1_message"
   MSG_M2 = "m2_message"
   MSG_M3 = "m3_message"
