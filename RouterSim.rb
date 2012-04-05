@@ -12,15 +12,17 @@ require './TinyReaverCommon.rb'
 
 class RouterSim
   include TinyReaverCommon
-  attr_accessor :ssid
+  attr_accessor :ssid, :psk
   
   def initialize params=nil
     @ssid = "00:11:22:33:44:55"
-    @pin = "00055670"
+    @pin = "00050128"
+    @psk = "SuperSecurep@assw3rd"
     
     if params
       @ssid = params[:ssid] unless !params[:ssid]
       @pin= params[:pin] unless !params[:pin]
+      @psk= params[:psk] unless !params[:psk]
     end
   end
   
@@ -74,6 +76,11 @@ class RouterSim
         create_message :NAK
       end
     when MSG_M6
+      if @pin == msg_content
+        create_message :m7
+      else
+        create_message :NAK
+      end
       
     end
     
