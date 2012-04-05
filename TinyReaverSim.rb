@@ -1,4 +1,4 @@
-#!usr/bin/env ruby
+#!/usr/bin/env ruby
 
 ### Tiny Reaver
 # Author: Uri Gorelik
@@ -26,18 +26,30 @@ class TinyReaver
   include TinyReaverCommon
   
   # Set the public variables
-  attr_accessor :router, :target, :pin
+  attr_accessor :router, :target, :pin, :title
   
   # Class variables
   @@log = ""
   
-  TIME_FACTOR = 0.2
+  @@title = %@
+* * * * * * * * * * * * * * * * * * * * * * * * 
+* TinyReaver 0.1 - a simplified reaver attack *
+* =========================================== *
+* * * * * * * * * * * * * * * * * * * * * * * * 
+
+@
+  
   TIME_MSG_TRANSACTION = 1.2
   TIME_ASSOCIATION = 3.0
   
   ##################################################
   # Class methods
   #
+  
+  # The title string
+  def self.title
+    @@title
+  end
   
   # Log 
   def self.log type, text=""
@@ -73,7 +85,6 @@ class TinyReaver
     log :out, "Scanning for networks"
     # Pretend we found a router
     log :out, "Found hosts:"
-    log :nl
     log :out, "SSID"
     log :out, "#{RouterSim.new.ssid}"
     log :nl
@@ -86,14 +97,24 @@ class TinyReaver
   #
   
   # Init
-  def initialize target
+  def initialize params
     @router = RouterSim.new
-    @target = target
+   
     @current_pin = 0
     @half_pin = -1
     @pin = -1
     @state = STATE_BEGIN
-    @time_factor = TIME_FACTOR
+    @time_factor = 1.0
+    
+    
+    p = params["b"] || params["ssid"]
+    @target = p unless p == nil
+    
+    p = params["d"] || params["delay"]
+    @time_factor = p.to_f unless p == nil    
+    
+    log :db, "This is the delay #{@time_factor}"
+    
   end
   
   
@@ -285,17 +306,32 @@ end
 ############ ############ ############ ############ 
 # Running
 #
-`clear`
 
-case ARGV.shift
-when "--scan", "-s"
-  # Perform a scan
-  reaver = TinyReaver.scan
-when "--ssid", "-b"
-  reaver = TinyReaver.new ARGV.shift
+# Print the title
+system "clear"
+print TinyReaver.title
+
+
+# Parse the commands
+params = {}
+ARGV.each_with_index do |command, i|
+  if command[0] == "-"
+    if (i + 1) < ARGV.size && ARGV[i + 1][0] != '-'
+      params[command.delete '-'] = ARGV[i + 1]
+    else
+      params[command.delete '-'] = true
+    end
+  end
+end
+
+  
+if params["scan"] || params["s"]
+  reaver = TinyReaver.scan  
+  
+elsif params["ssid"] || params["b"]
+  
+  reaver = TinyReaver.new params
   start = Time.now
   reaver.attack
   endTime = Time.now - start
-  
-  
 end

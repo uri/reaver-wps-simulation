@@ -17,15 +17,4 @@ module TinyReaverCommon
   MSG_M5 = "m5_message"
   MSG_M6 = "m6_message"
   MSG_M7 = "m7_message"
-  
-  
-  ###
-  # Messaging
-  ###
-
-  
-  
-
-
-  
 end
