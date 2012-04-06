@@ -85,7 +85,7 @@ class TinyReaver
     log :out, "Scanning for networks"
     # Pretend we found a router
     log :out, "Found hosts:"
-    log :out, "SSID"
+    log :out, "BSSID"
     log :out, "#{RouterSim.new.ssid}"
     log :nl
     
@@ -107,7 +107,7 @@ class TinyReaver
     @time_factor = 1.0
     
     
-    p = params["b"] || params["ssid"]
+    p = params["b"] || params["bssid"]
     @target = p unless p == nil
     
     p = params["d"] || params["delay"]
@@ -328,7 +328,7 @@ end
 if params["scan"] || params["s"]
   reaver = TinyReaver.scan  
   
-elsif params["ssid"] || params["b"]
+elsif params["bssid"] || params["b"]
   
   reaver = TinyReaver.new params
   start = Time.now
